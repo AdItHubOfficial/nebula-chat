@@ -1,0 +1,36 @@
+# Render.com Blueprint — deploys Nebula Chat as a single web service.
+# The Express server serves the built React app + the REST API + Socket.IO.
+#
+# One-click: push this repo to GitHub, then on Render → "New +" → "Blueprint"
+# and point it at the repo. Or create a Web Service manually with the
+# buildCommand / startCommand below.
+
+services:
+  - type: web
+    name: nebula-chat
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Auto-generates a strong secret on first deploy.
+      - key: JWT_SECRET
+        generateValue: true
+      # SQLite file (default). NOTE: the free plan's disk is EPHEMERAL — data
+      # resets on every deploy/restart (the demo data re-seeds automatically).
+      - key: DATABASE_URL
+        value: file:./dev.db
+
+    # ── To keep data + uploads between restarts (requires a paid instance) ──
+    # 1. Change `plan: free` above to `plan: starter`.
+    # 2. Uncomment the disk block below.
+    # 3. Set DATABASE_URL to  file:/var/data/dev.db
+    # 4. Add an env var  UPLOAD_DIR = /var/data/uploads
+    #
+    # disk:
+    #   name: nebula-data
+    #   mountPath: /var/data
+    #   sizeGB: 1

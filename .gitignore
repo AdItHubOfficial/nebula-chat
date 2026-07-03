@@ -1,0 +1,30 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment (secrets) — set these in Render's dashboard, not in git
+.env
+.env.*
+!.env.example
+
+# Prisma / SQLite
+prisma/dev.db
+prisma/dev.db-journal
+prisma/migrations/dev.db*
+
+# Uploads (user generated)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

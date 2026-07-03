@@ -1,0 +1,324 @@
+// Nebula Chat data model — SQLite via Prisma.
+// Run `npm run db:push` to sync and `npm run db:seed` to load demo data.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users & presence
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  displayName  String
+  passwordHash String
+  avatarUrl    String?
+  bannerColor  String   @default("#8b5cf6")
+  accentColor  String   @default("#8b5cf6")
+  bio          String   @default("")
+  customStatus String   @default("")
+  // ONLINE | IDLE | DND | INVISIBLE — the user's *chosen* presence.
+  presence     String   @default("ONLINE")
+  createdAt    DateTime @default(now())
+
+  ownedServers      Server[]        @relation("ServerOwner")
+  memberships       ServerMember[]
+  messages          Message[]
+  reactions         Reaction[]
+  invitesCreated    Invite[]
+  friendshipsSent   Friendship[]    @relation("FriendRequester")
+  friendshipsRecv   Friendship[]    @relation("FriendAddressee")
+  dmParticipants    DMParticipant[]
+  readStates        ReadState[]
+  auditActions      AuditLog[]      @relation("AuditActor")
+  bans              Ban[]
+}
+
+// ---------------------------------------------------------------------------
+// Servers (guilds)
+// ---------------------------------------------------------------------------
+
+model Server {
+  id          String   @id @default(cuid())
+  name        String
+  iconUrl     String?
+  bannerColor String   @default("#6366f1")
+  description String   @default("")
+  ownerId     String
+  createdAt   DateTime @default(now())
+
+  owner      User           @relation("ServerOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members    ServerMember[]
+  categories Category[]
+  channels   Channel[]
+  roles      Role[]
+  invites    Invite[]
+  emojis     Emoji[]
+  auditLogs  AuditLog[]
+  bans       Ban[]
+}
+
+model ServerMember {
+  id       String   @id @default(cuid())
+  serverId String
+  userId   String
+  nickname String?
+  joinedAt DateTime @default(now())
+  // Timeout expiry — when set and in the future, the member is muted.
+  timeoutUntil DateTime?
+
+  server Server       @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roles  MemberRole[]
+
+  @@unique([serverId, userId])
+  @@index([userId])
+}
+
+model Role {
+  id          String  @id @default(cuid())
+  serverId    String
+  name        String
+  color       String  @default("#a1a1aa")
+  position    Int     @default(0)
+  // Permission bitfield (see shared/permissions.ts)
+  permissions Int     @default(0)
+  hoist       Boolean @default(false)
+  mentionable Boolean @default(true)
+  isDefault   Boolean @default(false)
+
+  server  Server       @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  members MemberRole[]
+
+  @@index([serverId])
+}
+
+model MemberRole {
+  memberId String
+  roleId   String
+
+  member ServerMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  role   Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, roleId])
+}
+
+// ---------------------------------------------------------------------------
+// Channels
+// ---------------------------------------------------------------------------
+
+model Category {
+  id       String  @id @default(cuid())
+  serverId String
+  name     String
+  position Int     @default(0)
+
+  server   Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  channels Channel[]
+
+  @@index([serverId])
+}
+
+model Channel {
+  id         String   @id @default(cuid())
+  serverId   String
+  categoryId String?
+  name       String
+  // TEXT | VOICE | ANNOUNCEMENT
+  type       String   @default("TEXT")
+  topic      String   @default("")
+  position   Int      @default(0)
+  isPrivate  Boolean  @default(false)
+  isNsfw     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  server   Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  messages Message[]
+  reads    ReadState[]
+
+  @@index([serverId])
+}
+
+// ---------------------------------------------------------------------------
+// Direct messages
+// ---------------------------------------------------------------------------
+
+model DMChannel {
+  id        String   @id @default(cuid())
+  isGroup   Boolean  @default(false)
+  name      String?
+  ownerId   String?
+  createdAt DateTime @default(now())
+
+  participants DMParticipant[]
+  messages     Message[]
+  reads        ReadState[]
+}
+
+model DMParticipant {
+  id          String @id @default(cuid())
+  dmChannelId String
+  userId      String
+
+  dmChannel DMChannel @relation(fields: [dmChannelId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([dmChannelId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Messages
+// ---------------------------------------------------------------------------
+
+model Message {
+  id          String    @id @default(cuid())
+  channelId   String?
+  dmChannelId String?
+  authorId    String
+  content     String    @default("")
+  // DEFAULT | SYSTEM
+  type        String    @default("DEFAULT")
+  createdAt   DateTime  @default(now())
+  editedAt    DateTime?
+  pinned      Boolean   @default(false)
+  replyToId   String?
+
+  channel     Channel?     @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  dmChannel   DMChannel?   @relation(fields: [dmChannelId], references: [id], onDelete: Cascade)
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo     Message?     @relation("MessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[]    @relation("MessageReply")
+  attachments Attachment[]
+  reactions   Reaction[]
+
+  @@index([channelId, createdAt])
+  @@index([dmChannelId, createdAt])
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  messageId String
+  url       String
+  filename  String
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+}
+
+model Reaction {
+  id        String @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+}
+
+// ---------------------------------------------------------------------------
+// Invites, emojis, friendships, read state, moderation
+// ---------------------------------------------------------------------------
+
+model Invite {
+  code      String   @id
+  serverId  String
+  inviterId String
+  uses      Int      @default(0)
+  maxUses   Int      @default(0) // 0 = unlimited
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  server  Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  inviter User   @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([serverId])
+}
+
+model Emoji {
+  id        String   @id @default(cuid())
+  serverId  String
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId])
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  addresseeId String
+  // PENDING | ACCEPTED | BLOCKED
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+
+  requester User @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId])
+}
+
+model ReadState {
+  id            String   @id @default(cuid())
+  userId        String
+  channelId     String?
+  dmChannelId   String?
+  lastReadAt    DateTime @default(now())
+  mentionCount  Int      @default(0)
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   Channel?   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  dmChannel DMChannel? @relation(fields: [dmChannelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+  @@unique([userId, dmChannelId])
+}
+
+model Ban {
+  id        String   @id @default(cuid())
+  serverId  String
+  userId    String
+  reason    String   @default("")
+  createdAt DateTime @default(now())
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  serverId  String
+  actorId   String
+  action    String
+  targetId  String?
+  meta      String   @default("{}")
+  createdAt DateTime @default(now())
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  actor  User   @relation("AuditActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, createdAt])
+}

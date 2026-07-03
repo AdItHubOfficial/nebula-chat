@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="0.55" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#ec4899"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.32" cy="0.28" r="0.75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="0.4" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="planet" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f3e8ff"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="128" fill="url(#glow)"/>
+  <ellipse cx="256" cy="256" rx="168" ry="66" transform="rotate(-27 256 256)" fill="none" stroke="#ffffff" stroke-width="20" stroke-opacity="0.95"/>
+  <circle cx="256" cy="256" r="58" fill="url(#planet)"/>
+  <circle cx="234" cy="234" r="16" fill="#ffffff" fill-opacity="0.55"/>
+  <circle cx="392" cy="150" r="9" fill="#ffffff"/>
+  <circle cx="360" cy="120" r="4" fill="#ffffff" fill-opacity="0.8"/>
+  <circle cx="132" cy="356" r="7" fill="#ffffff" fill-opacity="0.9"/>
+  <circle cx="386" cy="372" r="5" fill="#ffffff" fill-opacity="0.85"/>
+  <circle cx="150" cy="176" r="4" fill="#ffffff" fill-opacity="0.7"/>
+</svg>
