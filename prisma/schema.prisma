@@ -30,6 +30,8 @@ model User {
   // Account badges
   verified     Boolean  @default(false)
   og           Boolean  @default(false)
+  // Founder / site administrator — can grant badges to anyone.
+  siteAdmin    Boolean  @default(false)
   createdAt    DateTime @default(now())
 
   ownedServers      Server[]        @relation("ServerOwner")

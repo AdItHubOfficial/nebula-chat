@@ -20,6 +20,7 @@ import dmRoutes from './routes/dms';
 import inviteRoutes from './routes/invites';
 import searchRoutes from './routes/search';
 import uploadRoutes from './routes/uploads';
+import adminRoutes from './routes/admin';
 
 // Ensure the uploads directory exists.
 fs.mkdirSync(config.uploadDir, { recursive: true });
@@ -62,6 +63,7 @@ app.use('/api/dms', dmRoutes);
 app.use('/api', inviteRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
 

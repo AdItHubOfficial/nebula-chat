@@ -9,11 +9,36 @@ import {
 const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = 'nebula123';
+const FOUNDER_PASSWORD = 'Earthinwar1';
+
+// Founder profile — ensured on every deploy so it always exists with its
+// password, badges, and site-admin rights.
+const FOUNDER = {
+  username: 'nebula',
+  email: 'nebula@nebula.chat',
+  displayName: 'Nebula',
+  accentColor: '#a855f7',
+  bannerColor: '#7c3aed',
+  bio: 'Founder & OG of Nebula Chat. 🌌',
+  customStatus: '👑 running the galaxy',
+  presence: 'ONLINE',
+  verified: true,
+  og: true,
+  siteAdmin: true,
+};
 
 async function main() {
+  const founderHash = await bcrypt.hash(FOUNDER_PASSWORD, 10);
+
   const existing = await prisma.user.count();
   if (existing > 0) {
-    console.log(`↷ Database already has ${existing} users — skipping seed. (run "npm run db:reset" to reseed)`);
+    // Full demo data already present — just guarantee the founder account.
+    await prisma.user.upsert({
+      where: { username: FOUNDER.username },
+      update: { passwordHash: founderHash, verified: true, og: true, siteAdmin: true },
+      create: { ...FOUNDER, passwordHash: founderHash },
+    });
+    console.log(`↷ Database already has ${existing} users — ensured founder account (nebula).`);
     return;
   }
 
@@ -33,10 +58,11 @@ async function main() {
 
   const users: Record<string, { id: string }> = {};
   for (const u of usersData) {
-    const created = await prisma.user.create({ data: { ...u, passwordHash } });
+    const isFounder = u.username === FOUNDER.username;
+    const created = await prisma.user.create({ data: { ...u, passwordHash: isFounder ? founderHash : passwordHash, siteAdmin: isFounder } });
     users[u.username] = created;
   }
-  console.log(`  ✓ ${usersData.length} users (login with any username, password "${DEMO_PASSWORD}")`);
+  console.log(`  ✓ ${usersData.length} users (demo login password "${DEMO_PASSWORD}"; founder "nebula" password "${FOUNDER_PASSWORD}")`);
 
   // --- Server: Nebula HQ -------------------------------------------------
   const hq = await prisma.server.create({

@@ -10,7 +10,8 @@ export type ModalType =
   | 'invite'
   | 'userProfile'
   | 'quickSwitcher'
-  | 'search';
+  | 'search'
+  | 'admin';
 
 export interface ContextMenuItem {
   label?: string;

@@ -165,6 +165,11 @@ export const api = {
     global: (q: string) => get<{ users: PublicUser[]; servers: ServerSummary[]; channels: Channel[] }>(`/search?q=${encodeURIComponent(q)}`),
   },
 
+  admin: {
+    setBadges: (userId: string, badges: { verified?: boolean; og?: boolean }) =>
+      patch<{ user: PublicUser }>(`/admin/users/${userId}/badges`, badges),
+  },
+
   uploads: {
     files: (files: File[]) => {
       const fd = new FormData();

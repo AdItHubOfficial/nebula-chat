@@ -9,6 +9,7 @@ import SettingsModal from '@/components/modals/SettingsModal';
 import ServerSettingsModal from '@/components/modals/ServerSettingsModal';
 import QuickSwitcher from '@/components/modals/QuickSwitcher';
 import SearchModal from '@/components/modals/SearchModal';
+import AdminBadgesModal from '@/components/modals/AdminBadgesModal';
 
 export default function ModalRoot() {
   const modal = useModalStore((s) => s.modal);
@@ -26,6 +27,7 @@ export default function ModalRoot() {
       {modal?.type === 'serverSettings' && data?.serverId && <ServerSettingsModal key="serverSettings" serverId={data.serverId} onClose={close} tab={data?.tab} />}
       {modal?.type === 'quickSwitcher' && <QuickSwitcher key="quickSwitcher" onClose={close} />}
       {modal?.type === 'search' && <SearchModal key="search" onClose={close} serverId={data?.serverId} />}
+      {modal?.type === 'admin' && <AdminBadgesModal key="admin" onClose={close} />}
     </AnimatePresence>
   );
 }

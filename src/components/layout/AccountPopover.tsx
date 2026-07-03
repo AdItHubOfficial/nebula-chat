@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Pencil, Check, Copy, LogOut, Smile, ChevronRight } from 'lucide-react';
+import { Pencil, Check, Copy, LogOut, Smile, ChevronRight, Wand2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useModalStore } from '@/store/modalStore';
 import { api } from '@/lib/api';
@@ -121,6 +121,19 @@ export default function AccountPopover({ onClose }: { onClose: () => void }) {
                 openModal('settings', { tab: 'My Account' });
               }}
             />
+
+            {user.siteAdmin && (
+              <button
+                onClick={() => {
+                  onClose();
+                  openModal('admin');
+                }}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-accent transition hover:bg-accent/10"
+              >
+                <Wand2 size={16} />
+                <span>Founder Panel</span>
+              </button>
+            )}
 
             {/* Status selector */}
             <button
