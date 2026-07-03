@@ -14,6 +14,8 @@ export interface PublicUser {
   bio: string;
   customStatus: string;
   presence: PresenceState;
+  verified: boolean;
+  og: boolean;
   // live connection status computed by the presence service
   online?: boolean;
   createdAt: string;

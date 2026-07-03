@@ -36,6 +36,8 @@ export function toPublicUser(user: any): PublicUser {
     bio: user.bio ?? '',
     customStatus: user.customStatus ?? '',
     presence,
+    verified: user.verified ?? false,
+    og: user.og ?? false,
     online: presence !== 'OFFLINE',
     createdAt: iso(user.createdAt),
   };

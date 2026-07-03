@@ -63,7 +63,7 @@ function MemberRow({ member, roles, ownerId, onClick }: { member: Member; roles:
           <span className="truncate text-sm font-semibold" style={{ color: color ?? 'rgb(var(--c-text))' }}>
             {member.nickname || member.user.displayName}
           </span>
-          <RoleBadges owner={isOwner} admin={isAdmin} timedOut={timedOut} />
+          <RoleBadges owner={isOwner} admin={isAdmin} verified={member.user.verified} og={member.user.og} timedOut={timedOut} />
         </div>
         {member.user.customStatus && <div className="truncate text-[11px] text-muted">{member.user.customStatus}</div>}
       </div>

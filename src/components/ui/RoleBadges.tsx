@@ -1,4 +1,4 @@
-import { Crown, ShieldCheck, Clock } from 'lucide-react';
+import { Crown, ShieldCheck, Clock, BadgeCheck } from 'lucide-react';
 import Tooltip from './Tooltip';
 import { combinePermissions, hasPermission, Permission } from '@shared/permissions';
 import type { Member, Role } from '@shared/types';
@@ -13,13 +13,15 @@ export function memberIsAdmin(member: Member, roles: Role[]): boolean {
 interface Props {
   owner?: boolean;
   admin?: boolean;
+  verified?: boolean;
+  og?: boolean;
   timedOut?: boolean;
   size?: number;
 }
 
 // Small Discord-style indicator icons shown next to a member's name.
-export function RoleBadges({ owner, admin, timedOut, size = 13 }: Props) {
-  if (!owner && !admin && !timedOut) return null;
+export function RoleBadges({ owner, admin, verified, og, timedOut, size = 13 }: Props) {
+  if (!owner && !admin && !verified && !og && !timedOut) return null;
   return (
     <span className="flex shrink-0 items-center gap-1">
       {owner && (
@@ -30,6 +32,21 @@ export function RoleBadges({ owner, admin, timedOut, size = 13 }: Props) {
       {admin && (
         <Tooltip content="Administrator">
           <ShieldCheck size={size} className="text-accent" />
+        </Tooltip>
+      )}
+      {verified && (
+        <Tooltip content="Verified">
+          <BadgeCheck size={size + 1} className="text-[#3b9dff]" strokeWidth={2.25} />
+        </Tooltip>
+      )}
+      {og && (
+        <Tooltip content="OG — original member">
+          <span
+            className="grid place-items-center rounded px-1 font-black leading-none text-white"
+            style={{ height: size + 1, fontSize: size - 4, background: 'linear-gradient(135deg, rgb(var(--c-accent)), rgb(var(--c-accent-2)))' }}
+          >
+            OG
+          </span>
         </Tooltip>
       )}
       {timedOut && (

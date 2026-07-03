@@ -54,7 +54,7 @@ export default function UserProfileModal({ userId, onClose }: { userId: string; 
             <div className="rounded-2xl bg-black/20 p-4">
               <div className="flex items-center gap-2">
                 <h2 className="font-display text-2xl font-bold">{user.displayName}</h2>
-                <RoleBadges owner={badges.owner} admin={badges.admin} size={18} />
+                <RoleBadges owner={badges.owner} admin={badges.admin} verified={user.verified} og={user.og} size={18} />
               </div>
               <p className="text-muted">@{user.username}</p>
               {user.customStatus && <p className="mt-2 text-sm">{user.customStatus}</p>}

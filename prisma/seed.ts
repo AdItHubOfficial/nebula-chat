@@ -28,6 +28,7 @@ async function main() {
     { username: 'comet', displayName: 'Comet', email: 'comet@nebula.chat', accentColor: '#f59e0b', bannerColor: '#d97706', bio: 'Community wrangler.', customStatus: '', presence: 'ONLINE' },
     { username: 'luna', displayName: 'Luna', email: 'luna@nebula.chat', accentColor: '#a78bfa', bannerColor: '#7c3aed', bio: 'Moon enthusiast 🌙', customStatus: '💤 afk', presence: 'INVISIBLE' },
     { username: 'quark', displayName: 'Quark', email: 'quark@nebula.chat', accentColor: '#f472b6', bannerColor: '#be185d', bio: 'Physics + code.', customStatus: '', presence: 'OFFLINE' },
+    { username: 'nebula', displayName: 'Nebula', email: 'nebula@nebula.chat', accentColor: '#a855f7', bannerColor: '#7c3aed', bio: 'Founder & OG of Nebula Chat. 🌌', customStatus: '👑 running the galaxy', presence: 'ONLINE', verified: true, og: true },
   ];
 
   const users: Record<string, { id: string }> = {};
@@ -43,7 +44,7 @@ async function main() {
       name: 'Nebula HQ',
       description: 'The official Nebula Chat community.',
       bannerColor: '#7c3aed',
-      ownerId: users.nova.id,
+      ownerId: users.nebula.id,
     },
   });
 
@@ -73,6 +74,7 @@ async function main() {
     return member;
   }
 
+  await addMember(hq.id, users.nebula.id, [everyoneRole.id, adminRole.id]);
   await addMember(hq.id, users.nova.id, [everyoneRole.id, adminRole.id]);
   await addMember(hq.id, users.orbit.id, [everyoneRole.id, modRole.id]);
   await addMember(hq.id, users.comet.id, [everyoneRole.id, modRole.id]);
