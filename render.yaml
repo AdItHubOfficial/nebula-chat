@@ -1,38 +1,23 @@
 # Render.com Blueprint — deploys Nebula Chat as a single web service.
 # The Express server serves the built React app + the REST API + Socket.IO.
-#
-# One-click: push this repo to GitHub, then on Render → "New +" → "Blueprint"
-# and point it at the repo. Or create a Web Service manually with the
-# buildCommand / startCommand below.
+# Data is stored in a free, persistent Neon Postgres database (set DATABASE_URL).
 
 services:
   - type: web
     name: nebula-chat
     runtime: node
     plan: free
-    # --include=dev forces build tools (vite, tailwind, tsc) to install even
-    # though NODE_ENV=production would normally skip devDependencies.
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
-      # Auto-generates a strong secret on first deploy.
+      # Auto-generates a strong secret on first deploy (persists across deploys).
       - key: JWT_SECRET
         generateValue: true
-      # SQLite file (default). NOTE: the free plan's disk is EPHEMERAL — data
-      # resets on every deploy/restart (the demo data re-seeds automatically).
+      # Set this in the Render dashboard to your Neon Postgres connection string
+      # (e.g. postgresql://user:pass@ep-xxx.region.aws.neon.tech/nebula?sslmode=require).
+      # Because data lives in Neon, it survives every deploy/restart.
       - key: DATABASE_URL
-        value: file:./dev.db
-
-    # ── To keep data + uploads between restarts (requires a paid instance) ──
-    # 1. Change `plan: free` above to `plan: starter`.
-    # 2. Uncomment the disk block below.
-    # 3. Set DATABASE_URL to  file:/var/data/dev.db
-    # 4. Add an env var  UPLOAD_DIR = /var/data/uploads
-    #
-    # disk:
-    #   name: nebula-data
-    #   mountPath: /var/data
-    #   sizeGB: 1
+        sync: false
