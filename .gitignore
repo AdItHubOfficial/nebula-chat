@@ -28,3 +28,6 @@ yarn-error.log*
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# stray nested clone created by GitHub Desktop
+/nebula-chat/
