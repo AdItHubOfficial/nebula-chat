@@ -110,7 +110,7 @@ function MessageItemBase({ message, grouped, convoKey, canManage, ownerId }: Pro
             <button onClick={(e) => openProfile(message.authorId, (e.currentTarget as HTMLElement).getBoundingClientRect())} className="font-semibold text-content hover:underline" style={{ color: message.author.accentColor }}>
               {message.author.displayName}
             </button>
-            <RoleBadges owner={!!ownerId && message.authorId === ownerId} verified={message.author.verified} og={message.author.og} size={14} />
+            <RoleBadges owner={!!ownerId && message.authorId === ownerId} admin={message.author.adminBadge} verified={message.author.verified} og={message.author.og} size={14} />
             <Tooltip content={groupTimestamp(message.createdAt)} side="top">
               <span className="text-[11px] text-faint">{groupTimestamp(message.createdAt)}</span>
             </Tooltip>

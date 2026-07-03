@@ -21,6 +21,7 @@ router.use(
 const badgeSchema = z.object({
   verified: z.boolean().optional(),
   og: z.boolean().optional(),
+  adminBadge: z.boolean().optional(),
 });
 
 // Grant or remove account badges for any user.

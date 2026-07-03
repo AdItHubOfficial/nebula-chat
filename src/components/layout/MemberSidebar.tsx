@@ -50,7 +50,7 @@ function MemberRow({ member, roles, ownerId, onClick }: { member: Member; roles:
   const color = topColor(member, roles);
   const offline = !member.user.online;
   const isOwner = !!ownerId && member.userId === ownerId;
-  const isAdmin = isOwner || memberIsAdmin(member, roles);
+  const isAdmin = isOwner || memberIsAdmin(member, roles) || member.user.adminBadge;
   const timedOut = !!member.timeoutUntil && new Date(member.timeoutUntil) > new Date();
   return (
     <button

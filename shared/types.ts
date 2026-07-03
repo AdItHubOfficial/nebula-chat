@@ -16,6 +16,7 @@ export interface PublicUser {
   presence: PresenceState;
   verified: boolean;
   og: boolean;
+  adminBadge: boolean;
   siteAdmin: boolean;
   // live connection status computed by the presence service
   online?: boolean;

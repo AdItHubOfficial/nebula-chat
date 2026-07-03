@@ -38,6 +38,7 @@ export function toPublicUser(user: any): PublicUser {
     presence,
     verified: user.verified ?? false,
     og: user.og ?? false,
+    adminBadge: user.adminBadge ?? false,
     siteAdmin: user.siteAdmin ?? false,
     online: presence !== 'OFFLINE',
     createdAt: iso(user.createdAt),

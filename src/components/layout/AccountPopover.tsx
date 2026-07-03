@@ -75,7 +75,7 @@ export default function AccountPopover({ onClose }: { onClose: () => void }) {
           <div className="rounded-xl bg-black/25 p-3">
             <div className="flex items-center gap-1.5">
               <h3 className="font-display text-base font-bold leading-tight">{user.displayName}</h3>
-              <RoleBadges owner={owner} admin={admin} verified={user.verified} og={user.og} size={16} />
+              <RoleBadges owner={owner} admin={admin || user.adminBadge} verified={user.verified} og={user.og} size={16} />
             </div>
             <p className="text-xs text-muted">@{user.username}</p>
 
