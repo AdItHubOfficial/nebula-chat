@@ -11,7 +11,8 @@ export type ModalType =
   | 'userProfile'
   | 'quickSwitcher'
   | 'search'
-  | 'admin';
+  | 'admin'
+  | 'createGroup';
 
 export interface ContextMenuItem {
   label?: string;

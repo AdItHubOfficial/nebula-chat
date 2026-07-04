@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Users, Search, UsersRound } from 'lucide-react';
+import { Users, Search, UsersRound, Plus } from 'lucide-react';
 import type { DMChannelDTO } from '@shared/types';
 import { Avatar } from '@/components/ui/Avatar';
+import Tooltip from '@/components/ui/Tooltip';
 import { useDMStore } from '@/store/dmStore';
 import { useFriendStore } from '@/store/friendStore';
 import { useMessageStore } from '@/store/messageStore';
@@ -61,8 +62,13 @@ export default function DMSidebar() {
         </NavLink>
 
         {/* Section label */}
-        <div className="mb-1 mt-4 flex items-center justify-between px-2.5">
+        <div className="group mb-1 mt-4 flex items-center justify-between px-2.5">
           <span className="text-[0.68rem] font-bold uppercase tracking-wider text-faint">Direct Messages</span>
+          <Tooltip content="Create Group Chat">
+            <button onClick={() => useModalStore.getState().open('createGroup')} className="text-faint transition hover:text-content" aria-label="Create Group Chat">
+              <Plus size={15} />
+            </button>
+          </Tooltip>
         </div>
 
         {dms.length === 0 ? (
