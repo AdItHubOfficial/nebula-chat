@@ -54,9 +54,19 @@ const patterns: Record<SoundName, () => void> = {
     tone(180, 0.08, 0.2, 'sawtooth', 0.08);
   },
   ring: () => {
-    // A gentle two-note phone-style ring.
-    tone(587.33, 0, 0.22, 'sine', 0.1);
-    tone(880, 0.16, 0.28, 'sine', 0.1);
+    // A bright, bouncy "incoming call" melody that plays as two quick phrases
+    // ("ring–ring"), so the looped ringtone sounds like a real call.
+    const phrase: [number, number][] = [
+      [659.25, 0.0], // E5
+      [830.61, 0.13], // G#5
+      [987.77, 0.26], // B5
+      [1318.51, 0.42], // E6
+    ];
+    const play = (offset: number) => {
+      for (const [f, t] of phrase) tone(f, offset + t, 0.19, 'triangle', 0.13);
+    };
+    play(0);
+    play(0.66);
   },
 };
 
@@ -78,7 +88,7 @@ export const sounds = {
   startRingtone() {
     this.stopRingtone();
     this.play('ring');
-    ringtoneTimer = setInterval(() => this.play('ring'), 3000);
+    ringtoneTimer = setInterval(() => this.play('ring'), 2600);
   },
   stopRingtone() {
     if (ringtoneTimer) {
