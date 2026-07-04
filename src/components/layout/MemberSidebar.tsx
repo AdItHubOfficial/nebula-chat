@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { useServerStore } from '@/store/serverStore';
 import { useModalStore } from '@/store/modalStore';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useUserMenu } from '@/hooks/useUserMenu';
+import { Permission } from '@shared/permissions';
 import { Avatar } from '@/components/ui/Avatar';
 import { RoleBadges, memberIsAdmin } from '@/components/ui/RoleBadges';
 import { cn } from '@/lib/utils';
@@ -12,8 +15,21 @@ export default function MemberSidebar({ serverId }: { serverId: string }) {
   const members = useServerStore((s) => s.members[serverId]);
   const detail = useServerStore((s) => s.details[serverId]);
   const openProfilePopover = useModalStore((s) => s.openProfilePopover);
+  const { can } = usePermissions(serverId);
+  const openUserMenu = useUserMenu();
 
   const groups = useMemo(() => buildGroups(members ?? [], detail?.roles ?? []), [members, detail]);
+
+  function memberMenu(m: Member, e: React.MouseEvent) {
+    e.preventDefault();
+    openUserMenu(m.user, e.clientX, e.clientY, {
+      serverId,
+      canKick: can(Permission.KICK_MEMBERS),
+      canBan: can(Permission.BAN_MEMBERS),
+      canTimeout: can(Permission.TIMEOUT_MEMBERS),
+      isOwnerTarget: m.userId === detail?.ownerId,
+    });
+  }
 
   if (!members) {
     return (
@@ -37,7 +53,14 @@ export default function MemberSidebar({ serverId }: { serverId: string }) {
           </h3>
           <div className="space-y-0.5">
             {group.members.map((m) => (
-              <MemberRow key={m.id} member={m} roles={detail?.roles ?? []} ownerId={detail?.ownerId} onClick={(rect) => openProfilePopover(m.userId, rect)} />
+              <MemberRow
+                key={m.id}
+                member={m}
+                roles={detail?.roles ?? []}
+                ownerId={detail?.ownerId}
+                onClick={(rect) => openProfilePopover(m.userId, rect)}
+                onContextMenu={(e) => memberMenu(m, e)}
+              />
             ))}
           </div>
         </div>
@@ -46,7 +69,7 @@ export default function MemberSidebar({ serverId }: { serverId: string }) {
   );
 }
 
-function MemberRow({ member, roles, ownerId, onClick }: { member: Member; roles: Role[]; ownerId?: string; onClick: (rect: DOMRect) => void }) {
+function MemberRow({ member, roles, ownerId, onClick, onContextMenu }: { member: Member; roles: Role[]; ownerId?: string; onClick: (rect: DOMRect) => void; onContextMenu: (e: React.MouseEvent) => void }) {
   const color = topColor(member, roles);
   const offline = !member.user.online;
   const isOwner = !!ownerId && member.userId === ownerId;
@@ -55,6 +78,7 @@ function MemberRow({ member, roles, ownerId, onClick }: { member: Member; roles:
   return (
     <button
       onClick={(e) => onClick((e.currentTarget as HTMLElement).getBoundingClientRect())}
+      onContextMenu={onContextMenu}
       className={cn('flex w-full items-center gap-2.5 rounded-lg px-1.5 py-1 text-left transition hover:bg-white/5', offline && 'opacity-40 hover:opacity-100')}
     >
       <Avatar userId={member.userId} name={member.user.displayName} src={member.user.avatarUrl} size={32} presence={member.user.presence} showPresence />

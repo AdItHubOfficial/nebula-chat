@@ -11,6 +11,7 @@ interface AvatarProps {
   showPresence?: boolean;
   className?: string;
   onClick?: (e: React.MouseEvent) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
 const PRESENCE_COLORS: Record<PresenceState, string> = {
@@ -21,11 +22,11 @@ const PRESENCE_COLORS: Record<PresenceState, string> = {
   OFFLINE: 'rgb(var(--c-faint))',
 };
 
-function AvatarBase({ userId, name, src, size = 40, presence, showPresence, className, onClick }: AvatarProps) {
+function AvatarBase({ userId, name, src, size = 40, presence, showPresence, className, onClick, onContextMenu }: AvatarProps) {
   const [from, to] = gradientFor(userId);
   const dot = Math.max(10, Math.round(size * 0.32));
   return (
-    <div className={cn('relative shrink-0 select-none', onClick && 'cursor-pointer')} style={{ width: size, height: size }} onClick={onClick}>
+    <div className={cn('relative shrink-0 select-none', onClick && 'cursor-pointer')} style={{ width: size, height: size }} onClick={onClick} onContextMenu={onContextMenu}>
       {src ? (
         <img src={src} alt={name} className={cn('h-full w-full rounded-full object-cover', className)} draggable={false} />
       ) : (

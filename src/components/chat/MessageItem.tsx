@@ -14,6 +14,7 @@ import { QUICK_REACTIONS } from '@shared/emoji';
 import { Avatar } from '@/components/ui/Avatar';
 import { RoleBadges } from '@/components/ui/RoleBadges';
 import Tooltip from '@/components/ui/Tooltip';
+import { useUserMenu } from '@/hooks/useUserMenu';
 import EmojiPicker from './EmojiPicker';
 import type { Attachment, ReactionGroup } from '@shared/types';
 
@@ -32,6 +33,12 @@ function MessageItemBase({ message, grouped, convoKey, canManage, ownerId }: Pro
   const [pickerOpen, setPickerOpen] = useState(false);
   const openProfile = useModalStore((s) => s.openProfilePopover);
   const openContextMenu = useModalStore((s) => s.openContextMenu);
+  const openUserMenu = useUserMenu();
+
+  const authorMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openUserMenu(message.author, e.clientX, e.clientY);
+  };
 
   const isMine = message.authorId === me?.id;
   const jumbo = !message.attachments.length && isJumbo(message.content);
@@ -88,6 +95,7 @@ function MessageItemBase({ message, grouped, convoKey, canManage, ownerId }: Pro
             size={40}
             className="mt-0.5 cursor-pointer transition hover:opacity-90"
             onClick={(e) => openProfile(message.authorId, (e.currentTarget as HTMLElement).getBoundingClientRect())}
+            onContextMenu={authorMenu}
           />
         ) : (
           <span className="mt-1 hidden select-none text-[10px] leading-5 text-faint tabular-nums group-hover:block">{messageTime(message.createdAt)}</span>
@@ -107,7 +115,7 @@ function MessageItemBase({ message, grouped, convoKey, canManage, ownerId }: Pro
 
         {!grouped && (
           <div className="flex items-baseline gap-2">
-            <button onClick={(e) => openProfile(message.authorId, (e.currentTarget as HTMLElement).getBoundingClientRect())} className="font-semibold text-content hover:underline" style={{ color: message.author.accentColor }}>
+            <button onClick={(e) => openProfile(message.authorId, (e.currentTarget as HTMLElement).getBoundingClientRect())} onContextMenu={authorMenu} className="font-semibold text-content hover:underline" style={{ color: message.author.accentColor }}>
               {message.author.displayName}
             </button>
             <RoleBadges owner={(!!ownerId && message.authorId === ownerId) || message.author.ownerBadge} coOwner={message.author.coOwnerBadge} admin={message.author.adminBadge} verified={message.author.verified} og={message.author.og} size={14} />
