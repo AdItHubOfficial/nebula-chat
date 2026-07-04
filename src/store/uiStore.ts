@@ -21,7 +21,7 @@ const DEFAULT_SETTINGS: Settings = {
   showTimestamps: true,
   compactMode: false,
   soundsEnabled: true,
-  desktopNotifications: false,
+  desktopNotifications: true,
   mentionSounds: true,
   pushToTalk: false,
   pushToTalkKey: 'Space',
@@ -108,6 +108,13 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: 'nebula.ui',
+      version: 1,
+      // Ensure older saved settings pick up new fields + notifications-on default.
+      migrate: (persisted: unknown) => {
+        const state = (persisted ?? {}) as { settings?: Partial<Settings> };
+        state.settings = { ...DEFAULT_SETTINGS, ...state.settings, desktopNotifications: true };
+        return state;
+      },
       partialize: (s) => ({
         settings: s.settings,
         channelWidth: s.channelWidth,
