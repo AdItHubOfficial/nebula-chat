@@ -80,7 +80,7 @@ export default function ProfilePopover() {
               <div className="rounded-2xl bg-black/25 p-3">
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-display text-lg font-bold leading-tight">{user.displayName}</h3>
-                  <RoleBadges owner={badges.owner} admin={badges.admin || user.adminBadge} verified={user.verified} og={user.og} size={16} />
+                  <RoleBadges owner={badges.owner || user.ownerBadge} coOwner={user.coOwnerBadge} admin={badges.admin || user.adminBadge} verified={user.verified} og={user.og} size={16} />
                 </div>
                 <p className="text-sm text-muted">@{user.username}</p>
                 {user.customStatus && <p className="mt-2 text-sm text-content">{user.customStatus}</p>}

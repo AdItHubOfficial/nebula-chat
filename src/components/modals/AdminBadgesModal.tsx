@@ -1,15 +1,24 @@
-import { useEffect, useState } from 'react';
-import { Search, Loader2, BadgeCheck, ShieldCheck } from 'lucide-react';
+import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
+import { Search, Loader2, BadgeCheck, ShieldCheck, Crown } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { Avatar } from '@/components/ui/Avatar';
 import { RoleBadges } from '@/components/ui/RoleBadges';
+import Tooltip from '@/components/ui/Tooltip';
 import { api } from '@/lib/api';
 import { toast } from '@/store/toastStore';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 import type { PublicUser } from '@shared/types';
 
-type BadgeField = 'verified' | 'og' | 'adminBadge';
+type BadgeField = 'ownerBadge' | 'coOwnerBadge' | 'adminBadge' | 'verified' | 'og';
+
+const TOGGLES: { field: BadgeField; title: string; icon: ReactNode; activeStyle: CSSProperties }[] = [
+  { field: 'ownerBadge', title: 'Owner', icon: <Crown size={14} fill="currentColor" strokeWidth={1.25} />, activeStyle: { background: '#f5b942', color: '#3a2a00' } },
+  { field: 'coOwnerBadge', title: 'Co-Owner', icon: <Crown size={14} fill="currentColor" strokeWidth={1.25} />, activeStyle: { background: '#9fb3c8', color: '#10151c' } },
+  { field: 'adminBadge', title: 'Admin', icon: <ShieldCheck size={14} />, activeStyle: { background: 'rgb(var(--c-accent))', color: '#fff' } },
+  { field: 'verified', title: 'Verified', icon: <BadgeCheck size={14} />, activeStyle: { background: '#3b9dff', color: '#fff' } },
+  { field: 'og', title: 'OG', icon: <span className="text-[10px] font-black leading-none">OG</span>, activeStyle: { background: 'linear-gradient(135deg, rgb(var(--c-accent)), rgb(var(--c-accent-2)))', color: '#fff' } },
+];
 
 // Founder-only panel: search any account and grant/remove badges.
 export default function AdminBadgesModal({ onClose }: { onClose: () => void }) {
@@ -40,13 +49,19 @@ export default function AdminBadgesModal({ onClose }: { onClose: () => void }) {
   async function toggle(user: PublicUser, field: BadgeField) {
     const next = !user[field];
     setResults((rs) => rs.map((u) => (u.id === user.id ? { ...u, [field]: next } : u)));
-    const badges = field === 'verified' ? { verified: next } : field === 'og' ? { og: next } : { adminBadge: next };
+    const badges = { [field]: next } as { [K in BadgeField]?: boolean };
     try {
       const { user: updated } = await api.admin.setBadges(user.id, badges);
       setResults((rs) => rs.map((u) => (u.id === updated.id ? updated : u)));
       const me = useAuthStore.getState().user;
       if (me && updated.id === me.id) {
-        useAuthStore.getState().patchUser({ verified: updated.verified, og: updated.og, adminBadge: updated.adminBadge });
+        useAuthStore.getState().patchUser({
+          verified: updated.verified,
+          og: updated.og,
+          adminBadge: updated.adminBadge,
+          ownerBadge: updated.ownerBadge,
+          coOwnerBadge: updated.coOwnerBadge,
+        });
       }
       toast.success('Badges updated', updated.displayName);
     } catch (err) {
@@ -74,47 +89,33 @@ export default function AdminBadgesModal({ onClose }: { onClose: () => void }) {
         )}
         {results.map((u) => (
           <div key={u.id} className="flex items-center gap-2.5 rounded-xl border border-line/50 bg-surface-2/50 p-2.5">
-            <Avatar userId={u.id} name={u.displayName} src={u.avatarUrl} size={38} presence={u.presence} showPresence />
+            <Avatar userId={u.id} name={u.displayName} src={u.avatarUrl} size={36} presence={u.presence} showPresence />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <span className="truncate text-sm font-semibold">{u.displayName}</span>
-                <RoleBadges admin={u.adminBadge} verified={u.verified} og={u.og} size={13} />
+                <RoleBadges owner={u.ownerBadge} coOwner={u.coOwnerBadge} admin={u.adminBadge} verified={u.verified} og={u.og} size={13} />
               </div>
               <span className="text-xs text-muted">@{u.username}</span>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <BadgeToggle active={u.adminBadge} variant="admin" onClick={() => toggle(u, 'adminBadge')}>
-                <ShieldCheck size={13} /> Admin
-              </BadgeToggle>
-              <BadgeToggle active={u.verified} variant="verified" onClick={() => toggle(u, 'verified')}>
-                <BadgeCheck size={13} /> Verified
-              </BadgeToggle>
-              <BadgeToggle active={u.og} variant="og" onClick={() => toggle(u, 'og')}>
-                OG
-              </BadgeToggle>
+              {TOGGLES.map((t) => {
+                const active = u[t.field];
+                return (
+                  <Tooltip key={t.field} content={t.title}>
+                    <button
+                      onClick={() => toggle(u, t.field)}
+                      style={active ? t.activeStyle : undefined}
+                      className={cn('grid h-8 w-8 place-items-center rounded-lg transition', !active && 'bg-surface-3/70 text-muted hover:text-content')}
+                    >
+                      {t.icon}
+                    </button>
+                  </Tooltip>
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
     </Modal>
-  );
-}
-
-function BadgeToggle({ active, onClick, children, variant }: { active: boolean; onClick: () => void; children: React.ReactNode; variant: 'verified' | 'og' | 'admin' }) {
-  const style = active
-    ? variant === 'og'
-      ? { background: 'linear-gradient(135deg, rgb(var(--c-accent)), rgb(var(--c-accent-2)))' }
-      : variant === 'verified'
-        ? { background: '#3b9dff' }
-        : { background: 'rgb(var(--c-accent))' }
-    : undefined;
-  return (
-    <button
-      onClick={onClick}
-      style={style}
-      className={cn('flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold transition', active ? 'text-white' : 'bg-surface-3/70 text-muted hover:text-content')}
-    >
-      {children}
-    </button>
   );
 }

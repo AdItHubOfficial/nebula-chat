@@ -12,6 +12,7 @@ export function memberIsAdmin(member: Member, roles: Role[]): boolean {
 
 interface Props {
   owner?: boolean;
+  coOwner?: boolean;
   admin?: boolean;
   verified?: boolean;
   og?: boolean;
@@ -20,13 +21,18 @@ interface Props {
 }
 
 // Small Discord-style indicator icons shown next to a member's name.
-export function RoleBadges({ owner, admin, verified, og, timedOut, size = 13 }: Props) {
-  if (!owner && !admin && !verified && !og && !timedOut) return null;
+export function RoleBadges({ owner, coOwner, admin, verified, og, timedOut, size = 13 }: Props) {
+  if (!owner && !coOwner && !admin && !verified && !og && !timedOut) return null;
   return (
     <span className="flex shrink-0 items-center gap-1">
       {owner && (
         <Tooltip content="Server Owner">
           <Crown size={size} className="text-[#f5b942]" fill="currentColor" strokeWidth={1.25} />
+        </Tooltip>
+      )}
+      {coOwner && !owner && (
+        <Tooltip content="Co-Owner">
+          <Crown size={size} className="text-[#9fb3c8]" fill="currentColor" strokeWidth={1.25} />
         </Tooltip>
       )}
       {admin && (

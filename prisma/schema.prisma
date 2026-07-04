@@ -30,8 +30,10 @@ model User {
   // Account badges
   verified     Boolean  @default(false)
   og           Boolean  @default(false)
-  // Account-level Administrator badge (grantable from the Founder Panel).
+  // Account-level badges grantable from the Founder Panel.
   adminBadge   Boolean  @default(false)
+  ownerBadge   Boolean  @default(false)
+  coOwnerBadge Boolean  @default(false)
   // Founder / site administrator — can grant badges to anyone.
   siteAdmin    Boolean  @default(false)
   createdAt    DateTime @default(now())

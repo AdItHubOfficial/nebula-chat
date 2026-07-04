@@ -166,7 +166,7 @@ export const api = {
   },
 
   admin: {
-    setBadges: (userId: string, badges: { verified?: boolean; og?: boolean; adminBadge?: boolean }) =>
+    setBadges: (userId: string, badges: { verified?: boolean; og?: boolean; adminBadge?: boolean; ownerBadge?: boolean; coOwnerBadge?: boolean }) =>
       patch<{ user: PublicUser }>(`/admin/users/${userId}/badges`, badges),
   },
 
