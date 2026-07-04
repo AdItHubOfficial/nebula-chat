@@ -60,6 +60,8 @@ const patterns: Record<SoundName, () => void> = {
   },
 };
 
+let ringtoneTimer: ReturnType<typeof setInterval> | null = null;
+
 export const sounds = {
   setEnabled(v: boolean) {
     enabled = v;
@@ -70,6 +72,18 @@ export const sounds = {
       patterns[name]?.();
     } catch {
       /* audio not available */
+    }
+  },
+  // Repeating phone-style ring for incoming calls.
+  startRingtone() {
+    this.stopRingtone();
+    this.play('ring');
+    ringtoneTimer = setInterval(() => this.play('ring'), 3000);
+  },
+  stopRingtone() {
+    if (ringtoneTimer) {
+      clearInterval(ringtoneTimer);
+      ringtoneTimer = null;
     }
   },
   // Must be called from a user gesture to unlock audio on some browsers.

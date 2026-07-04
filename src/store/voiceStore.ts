@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { voice } from '@/lib/voice';
+import { sounds } from '@/lib/sounds';
 import { toast } from './toastStore';
+
+export interface IncomingCall {
+  dmId: string;
+  callerId: string;
+  callerName: string;
+}
 
 interface VoiceState {
   channelId: string | null;
@@ -10,9 +17,12 @@ interface VoiceState {
   videoEnabled: boolean;
   screenSharing: boolean;
   tick: number;
+  incomingCall: IncomingCall | null;
   join: (channelId: string) => Promise<void>;
   joinDM: (dmId: string) => Promise<void>;
   leave: () => void;
+  setIncomingCall: (call: IncomingCall) => void;
+  clearIncomingCall: () => void;
   toggleMute: () => void;
   toggleDeafen: () => void;
   toggleCamera: () => Promise<void>;
@@ -30,6 +40,16 @@ export const useVoiceStore = create<VoiceState>((set) => ({
   videoEnabled: false,
   screenSharing: false,
   tick: 0,
+  incomingCall: null,
+
+  setIncomingCall(call) {
+    set({ incomingCall: call });
+    sounds.startRingtone();
+  },
+  clearIncomingCall() {
+    sounds.stopRingtone();
+    set({ incomingCall: null });
+  },
 
   async join(channelId) {
     try {

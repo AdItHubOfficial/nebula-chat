@@ -8,6 +8,7 @@ import { useServerStore } from '@/store/serverStore';
 import { useMessageStore } from '@/store/messageStore';
 import { useDMStore } from '@/store/dmStore';
 import { useFriendStore } from '@/store/friendStore';
+import { useVoiceStore } from '@/store/voiceStore';
 import { toast } from '@/store/toastStore';
 import { useUIStore } from '@/store/uiStore';
 import { sounds } from '@/lib/sounds';
@@ -24,6 +25,26 @@ function notify(title: string, body: string) {
   if (document.hasFocus()) return;
   try {
     new Notification(title, { body, icon: '/nebula.svg' });
+  } catch {
+    /* ignore */
+  }
+}
+
+// Call notifications are important, so they show regardless of the general
+// desktop-notification toggle (as long as the browser permission is granted).
+function notifyCall(callerName: string) {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  try {
+    const n = new Notification('📞 Incoming call', {
+      body: `${callerName} is calling you`,
+      icon: '/nebula.svg',
+      requireInteraction: true,
+      tag: 'nebula-call',
+    });
+    n.onclick = () => {
+      window.focus();
+      n.close();
+    };
   } catch {
     /* ignore */
   }
@@ -137,18 +158,20 @@ export function initRealtime(): () => void {
   socket.on(SocketEvents.VOICE_STATE, ({ channelId, participants }: { channelId: string; participants: VoiceParticipant[] }) => {
     const prev = useServerStore.getState().voiceStates[channelId] ?? [];
     server().setVoiceState(channelId, participants);
-    // Ring when a DM call starts and we're not already in it.
+    // Ring (and notify) when a DM call starts and we're not already in it.
     const me = useAuthStore.getState().user;
     const isDMCall = dms().dms.some((d) => d.id === channelId);
-    if (isDMCall && me) {
-      const iAmIn = participants.some((p) => p.userId === me.id);
-      const justStarted = prev.length === 0 && participants.length > 0;
-      if (!iAmIn && justStarted) {
-        const caller = participants[0];
-        if (useUIStore.getState().settings.soundsEnabled) sounds.play('ring');
-        toast.info('Incoming call', `${caller?.displayName ?? 'Someone'} is calling you`);
-        notify('Incoming call', `${caller?.displayName ?? 'Someone'} is calling`);
-      }
+    if (!isDMCall || !me) return;
+    const iAmIn = participants.some((p) => p.userId === me.id);
+    const justStarted = prev.length === 0 && participants.length > 0;
+    const vs = useVoiceStore.getState();
+    if (!iAmIn && justStarted) {
+      const caller = participants.find((p) => p.userId !== me.id) ?? participants[0];
+      vs.setIncomingCall({ dmId: channelId, callerId: caller.userId, callerName: caller.displayName });
+      notifyCall(caller.displayName);
+    } else if ((iAmIn || participants.length === 0) && vs.incomingCall?.dmId === channelId) {
+      // Answered here, or the caller hung up before we picked up → stop ringing.
+      vs.clearIncomingCall();
     }
   });
   socket.on(SocketEvents.VOICE_SPEAKING, ({ channelId, userId, speaking }: { channelId: string; userId: string; speaking: boolean }) =>

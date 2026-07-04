@@ -8,6 +8,7 @@ import ContextMenu from '@/components/ui/ContextMenu';
 import ModalRoot from '@/components/overlays/ModalRoot';
 import ProfilePopover from '@/components/overlays/ProfilePopover';
 import Lightbox from '@/components/overlays/Lightbox';
+import IncomingCallModal from '@/components/voice/IncomingCallModal';
 import { initRealtime, teardownRealtime, requestNotificationPermission } from '@/services/realtime';
 import { disconnectSocket } from '@/lib/socket';
 import { useServerStore } from '@/store/serverStore';
@@ -27,7 +28,7 @@ export default function AppLayout() {
     void useServerStore.getState().loadServers();
     void useDMStore.getState().loadDMs();
     void useFriendStore.getState().load();
-    if (useUIStore.getState().settings.desktopNotifications) requestNotificationPermission();
+    requestNotificationPermission();
     return () => {
       disconnectSocket();
       teardownRealtime();
@@ -78,6 +79,7 @@ export default function AppLayout() {
       <ModalRoot />
       <ProfilePopover />
       <Lightbox />
+      <IncomingCallModal />
     </div>
   );
 }

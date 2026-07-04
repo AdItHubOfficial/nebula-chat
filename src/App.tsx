@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { sounds } from './lib/sounds';
+import { requestNotificationPermission } from './services/realtime';
 import LoadingScreen from './components/ui/LoadingScreen';
 import AuthPage from './pages/AuthPage';
 import InvitePage from './pages/InvitePage';
@@ -29,6 +30,7 @@ export default function App() {
   useEffect(() => {
     const unlock = () => {
       sounds.unlock();
+      requestNotificationPermission();
       window.removeEventListener('pointerdown', unlock);
     };
     window.addEventListener('pointerdown', unlock);
