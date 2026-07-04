@@ -1,4 +1,4 @@
-import { Crown, ShieldCheck, Clock, BadgeCheck } from 'lucide-react';
+import { Crown, ShieldCheck, Clock, BadgeCheck, Sparkles } from 'lucide-react';
 import Tooltip from './Tooltip';
 import { combinePermissions, hasPermission, Permission } from '@shared/permissions';
 import type { Member, Role } from '@shared/types';
@@ -11,6 +11,7 @@ export function memberIsAdmin(member: Member, roles: Role[]): boolean {
 }
 
 interface Props {
+  founder?: boolean;
   owner?: boolean;
   coOwner?: boolean;
   admin?: boolean;
@@ -21,10 +22,25 @@ interface Props {
 }
 
 // Small Discord-style indicator icons shown next to a member's name.
-export function RoleBadges({ owner, coOwner, admin, verified, og, timedOut, size = 13 }: Props) {
-  if (!owner && !coOwner && !admin && !verified && !og && !timedOut) return null;
+export function RoleBadges({ founder, owner, coOwner, admin, verified, og, timedOut, size = 13 }: Props) {
+  if (!founder && !owner && !coOwner && !admin && !verified && !og && !timedOut) return null;
   return (
     <span className="flex shrink-0 items-center gap-1">
+      {founder && (
+        <Tooltip content="Nebula Founder">
+          <span
+            className="grid place-items-center rounded-md"
+            style={{
+              width: size + 5,
+              height: size + 5,
+              background: 'linear-gradient(135deg, rgb(var(--c-accent)), rgb(var(--c-accent-2)))',
+              boxShadow: '0 0 10px rgb(var(--c-accent) / 0.75)',
+            }}
+          >
+            <Sparkles size={size - 2} className="text-white" fill="currentColor" strokeWidth={1.5} />
+          </span>
+        </Tooltip>
+      )}
       {owner && (
         <Tooltip content="Server Owner">
           <Crown size={size} className="text-[#f5b942]" fill="currentColor" strokeWidth={1.25} />

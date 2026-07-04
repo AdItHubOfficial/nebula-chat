@@ -24,6 +24,7 @@ const FOUNDER = {
   presence: 'ONLINE',
   verified: true,
   og: true,
+  founderBadge: true,
   siteAdmin: true,
 };
 
@@ -35,7 +36,7 @@ async function main() {
     // Full demo data already present — just guarantee the founder account.
     await prisma.user.upsert({
       where: { username: FOUNDER.username },
-      update: { passwordHash: founderHash, verified: true, og: true, siteAdmin: true },
+      update: { passwordHash: founderHash, verified: true, og: true, founderBadge: true, siteAdmin: true },
       create: { ...FOUNDER, passwordHash: founderHash },
     });
     console.log(`↷ Database already has ${existing} users — ensured founder account (nebula).`);
@@ -59,7 +60,7 @@ async function main() {
   const users: Record<string, { id: string }> = {};
   for (const u of usersData) {
     const isFounder = u.username === FOUNDER.username;
-    const created = await prisma.user.create({ data: { ...u, passwordHash: isFounder ? founderHash : passwordHash, siteAdmin: isFounder } });
+    const created = await prisma.user.create({ data: { ...u, passwordHash: isFounder ? founderHash : passwordHash, siteAdmin: isFounder, founderBadge: isFounder } });
     users[u.username] = created;
   }
   console.log(`  ✓ ${usersData.length} users (demo login password "${DEMO_PASSWORD}"; founder "nebula" password "${FOUNDER_PASSWORD}")`);

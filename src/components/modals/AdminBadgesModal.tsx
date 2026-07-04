@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
-import { Search, Loader2, BadgeCheck, ShieldCheck, Crown } from 'lucide-react';
+import { Search, Loader2, BadgeCheck, ShieldCheck, Crown, Sparkles } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { Avatar } from '@/components/ui/Avatar';
 import { RoleBadges } from '@/components/ui/RoleBadges';
@@ -10,9 +10,10 @@ import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 import type { PublicUser } from '@shared/types';
 
-type BadgeField = 'ownerBadge' | 'coOwnerBadge' | 'adminBadge' | 'verified' | 'og';
+type BadgeField = 'founderBadge' | 'ownerBadge' | 'coOwnerBadge' | 'adminBadge' | 'verified' | 'og';
 
 const TOGGLES: { field: BadgeField; title: string; icon: ReactNode; activeStyle: CSSProperties }[] = [
+  { field: 'founderBadge', title: 'Founder', icon: <Sparkles size={13} fill="currentColor" strokeWidth={1.5} />, activeStyle: { background: 'linear-gradient(135deg, rgb(var(--c-accent)), rgb(var(--c-accent-2)))', color: '#fff' } },
   { field: 'ownerBadge', title: 'Owner', icon: <Crown size={14} fill="currentColor" strokeWidth={1.25} />, activeStyle: { background: '#f5b942', color: '#3a2a00' } },
   { field: 'coOwnerBadge', title: 'Co-Owner', icon: <Crown size={14} fill="currentColor" strokeWidth={1.25} />, activeStyle: { background: '#9fb3c8', color: '#10151c' } },
   { field: 'adminBadge', title: 'Admin', icon: <ShieldCheck size={14} />, activeStyle: { background: 'rgb(var(--c-accent))', color: '#fff' } },
@@ -61,6 +62,7 @@ export default function AdminBadgesModal({ onClose }: { onClose: () => void }) {
           adminBadge: updated.adminBadge,
           ownerBadge: updated.ownerBadge,
           coOwnerBadge: updated.coOwnerBadge,
+          founderBadge: updated.founderBadge,
         });
       }
       toast.success('Badges updated', updated.displayName);
@@ -93,7 +95,7 @@ export default function AdminBadgesModal({ onClose }: { onClose: () => void }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <span className="truncate text-sm font-semibold">{u.displayName}</span>
-                <RoleBadges owner={u.ownerBadge} coOwner={u.coOwnerBadge} admin={u.adminBadge} verified={u.verified} og={u.og} size={13} />
+                <RoleBadges founder={u.founderBadge} owner={u.ownerBadge} coOwner={u.coOwnerBadge} admin={u.adminBadge} verified={u.verified} og={u.og} size={13} />
               </div>
               <span className="text-xs text-muted">@{u.username}</span>
             </div>
@@ -105,7 +107,7 @@ export default function AdminBadgesModal({ onClose }: { onClose: () => void }) {
                     <button
                       onClick={() => toggle(u, t.field)}
                       style={active ? t.activeStyle : undefined}
-                      className={cn('grid h-8 w-8 place-items-center rounded-lg transition', !active && 'bg-surface-3/70 text-muted hover:text-content')}
+                      className={cn('grid h-7 w-7 place-items-center rounded-lg transition', !active && 'bg-surface-3/70 text-muted hover:text-content')}
                     >
                       {t.icon}
                     </button>

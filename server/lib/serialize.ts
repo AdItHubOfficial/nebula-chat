@@ -41,6 +41,7 @@ export function toPublicUser(user: any): PublicUser {
     adminBadge: user.adminBadge ?? false,
     ownerBadge: user.ownerBadge ?? false,
     coOwnerBadge: user.coOwnerBadge ?? false,
+    founderBadge: user.founderBadge ?? false,
     siteAdmin: user.siteAdmin ?? false,
     online: presence !== 'OFFLINE',
     createdAt: iso(user.createdAt),

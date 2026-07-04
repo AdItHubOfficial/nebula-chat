@@ -34,6 +34,7 @@ model User {
   adminBadge   Boolean  @default(false)
   ownerBadge   Boolean  @default(false)
   coOwnerBadge Boolean  @default(false)
+  founderBadge Boolean  @default(false)
   // Founder / site administrator — can grant badges to anyone.
   siteAdmin    Boolean  @default(false)
   createdAt    DateTime @default(now())

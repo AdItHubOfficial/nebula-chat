@@ -19,6 +19,7 @@ export interface PublicUser {
   adminBadge: boolean;
   ownerBadge: boolean;
   coOwnerBadge: boolean;
+  founderBadge: boolean;
   siteAdmin: boolean;
   // live connection status computed by the presence service
   online?: boolean;

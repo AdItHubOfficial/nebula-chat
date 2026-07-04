@@ -24,6 +24,7 @@ const badgeSchema = z.object({
   adminBadge: z.boolean().optional(),
   ownerBadge: z.boolean().optional(),
   coOwnerBadge: z.boolean().optional(),
+  founderBadge: z.boolean().optional(),
 });
 
 // Grant or remove account badges for any user.
